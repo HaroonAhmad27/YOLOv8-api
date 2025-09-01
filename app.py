@@ -5,6 +5,9 @@ from PIL import Image
 import io
 
 app = FastAPI()
+@app.get("/")
+def root():
+    return {"message": "API is live ✅"}
 
 # Load model at startup
 model = YOLO("best.pt")
