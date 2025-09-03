@@ -3,17 +3,28 @@ from fastapi.responses import JSONResponse
 from ultralytics import YOLO
 from PIL import Image
 import io
+import os
 
 app = FastAPI()
+
+# Try loading model
+MODEL_PATH = "best.pt"
+model = None
+
+if os.path.exists(MODEL_PATH):
+    model = YOLO(MODEL_PATH)
+else:
+    print("⚠️ best.pt not found. Please upload or download at runtime.")
+
 @app.get("/")
 def root():
     return {"message": "API is live ✅"}
 
-# Load model at startup
-model = YOLO("best.pt")
-
 @app.post("/detect")
 async def detect(file: UploadFile = File(...)):
+    if model is None:
+        return JSONResponse(content={"error": "Model not loaded"}, status_code=500)
+
     contents = await file.read()
     image = Image.open(io.BytesIO(contents))
 
